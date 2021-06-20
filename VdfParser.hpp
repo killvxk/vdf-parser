@@ -20,7 +20,7 @@ namespace parser {
 using namespace tao::pegtl;
 
 struct Comment : disable<two<'/'>, until<eolf>> {};
-struct Sep : sor<one<' ', '\t', '\n'>, Comment> {};
+struct Sep : sor<one<' ', '\t', '\r', '\n'>, Comment> {};
 struct Seps : star<Sep> {};
 
 struct Escaped : if_must<one<'\\'>, sor<one<'"', '\\'>>> {};
