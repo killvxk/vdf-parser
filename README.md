@@ -8,8 +8,9 @@ Parses VDF files using PEGTL
 vdf::Object root{};
 
 try {
-    tao::pegtl::file_input in{, ""};
+    tao::pegtl::file_input in{"some-file.vdf"};
     vdf::parser::State s{};
+    
     if (tao::pegtl::parse<vdf::parser::Grammar, vdf::parser::Action>(in, s)) {
       root = s.final_obj;
     }
