@@ -1,12 +1,3 @@
-#pragma once
-
-#include <stack>
-#include <string>
-#include <unordered_map>
-
-#include <tao/pegtl.hpp>
-
-// https://developer.valvesoftware.com/wiki/KeyValues
 namespace vdf {
 struct Object {
     std::string name{};
@@ -20,7 +11,7 @@ namespace parser {
 using namespace tao::pegtl;
 
 struct Comment : disable<two<'/'>, until<eolf>> {};
-struct Sep : sor<one<' ', '\t', '\r', '\n'>, Comment> {};
+struct Sep : sor<space, Comment> {};
 struct Seps : star<Sep> {};
 
 struct Escaped : if_must<one<'\\'>, sor<one<'"', '\\'>>> {};
@@ -28,19 +19,16 @@ struct Regular : not_one<'\r', '\n'> {};
 struct Character : sor<Escaped, Regular> {};
 struct String : if_must<one<'"'>, until<one<'"'>, Character>> {};
 
-struct Item : String {};
+struct Key : String {};
+struct Value : String {};
+struct KeyValue : seq<Key, Seps, Value> {};
 
 struct Object;
+struct ObjectName : String {};
+struct ObjectMembers : sor<list<sor<KeyValue, Object>, Seps>, Seps> {};
+struct Object : seq<ObjectName, Seps, one<'{'>, until<one<'}'>, ObjectMembers>> {};
 
-struct Key : Item {};
-struct Value : Item {};
-struct KeyValue : sor<seq<Key, Seps, Value>, Object> {};
-
-struct ObjectName : Item {};
-struct Object : seq<ObjectName, Seps, one<'{'>, Seps, list<KeyValue, Seps>, Seps, one<'}'>> {};
-
-struct Something : must<Seps, Object, Seps> {};
-struct Grammar : until<eof, sor<eolf, Something>> {};
+struct Grammar : until<eof, sor<eolf, Sep, Object>> {};
 
 struct State {
     std::string item{};
