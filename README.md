@@ -1,23 +1,21 @@
 # vdf-parser
+
 Parses VDF files using PEGTL
 
 ## Usage
-```
-#include "VdfParser.hpp"
 
-vdf::Object root{};
+```C++
+#include "vdf_parser.hpp"
 
-try {
-    tao::pegtl::file_input in{"some-file.vdf"};
-    vdf::parser::State s{};
-    
-    if (tao::pegtl::parse<vdf::parser::Grammar, vdf::parser::Action>(in, s)) {
-      root = s.final_obj;
-    }
-} catch (const tao::pegtl::parse_error& e) {
+// Parse a VDF file.
+auto result = vdf::parse_file("some-file.vdf");
+
+if (result.has_value()) {
+    // Use result.value()
+    auto& root = result.value()[0]; 
+    root["parent"]["child"]["something"].value
+} else {
     // Let the people know.
+    throw std::runtime_error{result.error()};
 }
-
-// Use root.
-root["parent"]["child"]["something"].value
 ```
