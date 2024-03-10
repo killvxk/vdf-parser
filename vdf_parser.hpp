@@ -37,16 +37,17 @@ struct KeyValue : seq<Key, Seps, Value> {};
 
 struct Object;
 struct ObjectName : String {};
-struct ObjectMembers : sor<list<sor<KeyValue, Object>, Seps>, Seps> {};
+struct ObjectMembers : list_tail<sor<KeyValue, Object>, Seps> {};
 struct ObjectMembersStart : one<'{'> {};
 struct ObjectMembersEnd : one<'}'> {};
-struct ObjectMembersList : seq<ObjectMembersStart, until<ObjectMembersEnd, ObjectMembers>> {};
+struct ObjectMembersList : seq<ObjectMembersStart, Seps, until<ObjectMembersEnd, ObjectMembers>> {};
 
 struct NamedObject : seq<ObjectName, Seps, ObjectMembersList> {};
 struct UnnamedObject : seq<ObjectMembersList> {};
 struct Object : sor<NamedObject, UnnamedObject> {};
+struct Objects : list_tail<Object, Seps> {};
 
-struct Grammar : until<eof, sor<eolf, Sep, Object>> {};
+struct Grammar : seq<Seps, Objects, eof> {};
 
 struct State {
     std::string item{};
